@@ -1,10 +1,12 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import UserInput from "./UserInput";
 import firebase from "./firebase";
+import DiceAndTimer from "./DiceAndTimer";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
 const Database = () => {
   const [data, SetData] = useState([]);
-  const [deckOrder, setDeckOrder] = useState([]);
   const [count, setCount] = useState(-1);
   const [lengthofData, setLengthofData] = useState(4);
   //THIS takes the array of numbers from deck order and goes through them individually
@@ -30,6 +32,8 @@ const Database = () => {
 
   //clicking this button will randomize and update firebase
   const newGame = () => {
+    const dbRef1 = firebase.database().ref("GamePlay");
+    dbRef1.remove();
     setStartGame(false);
     setCount(-1);
     setDisplayQuestion([]);
@@ -69,6 +73,7 @@ const Database = () => {
     const dbRef = firebase.database().ref("GamePlay");
     dbRef.remove();
   };
+  ///going to combine the count down with it
 
   const nextQuestion = () => {
     setStartGame(true);
@@ -107,34 +112,28 @@ const Database = () => {
 
   return (
     <div>
-      {startGame === false || count === 4
-        ? console.log("sort the deck")
-        : displayQuestion.map((e) => {
-            return <p>{e.randomDataSet[count].question}</p>;
-          })}
+      <Router>
+        <Link to="/DiceAndTimer">
+          <button
+            onClick={() => {
+              newGame();
+            }}
+          >
+            New Game
+          </button>
+        </Link>
+      </Router>
+      <section className="boardGameSection">
+        <div className="boardGameCard">
+          <DiceAndTimer reset={reset} nextQuestion={nextQuestion} />
 
-      <button
-        onClick={() => {
-          nextQuestion();
-        }}
-      >
-        Next Quetsions
-      </button>
-
-      <button
-        onClick={() => {
-          newGame();
-        }}
-      >
-        New Game
-      </button>
-      <button
-        onClick={() => {
-          reset();
-        }}
-      >
-        Reset
-      </button>
+          {startGame === false || count === 4
+            ? console.log("sort the deck")
+            : displayQuestion.map((e) => {
+                return <p>{e.randomDataSet[count].question}</p>;
+              })}
+        </div>
+      </section>
       <h1>HELLO</h1>
       <h2>{userAnswer}</h2>
       <UserInput
